@@ -7,9 +7,7 @@
 //
 // Generated from the TEXTINCLUDE 2 resource.
 //
-//#include "afxres.h"
-#include <windows.h>
-#define IDC_STATIC (-1) 
+#include "afxres.h"
 
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
@@ -28,7 +26,9 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 // 24
 //
 
-//1                       24      MOVEABLE PURE   "metapad.manifest"
+1                       24      MOVEABLE PURE   "metapad.manifest"
+
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -58,6 +58,7 @@ BEGIN
     PUSHBUTTON      "Cancel",IDCANCEL,87,24,35,14
 END
 
+/*
 #if defined(APSTUDIO_INVOKED) || defined(NO_RICH_EDIT)
 #if defined(APSTUDIO_INVOKED)
 IDD_PROPPAGE_A1_LE$(NO_RICH_EDIT) DIALOGEX 0, 0, 225, 167
@@ -113,7 +114,7 @@ BEGIN
                     WS_VSCROLL | WS_TABSTOP
 END
 #endif
-
+*/
 IDD_PAGE_SETUP DIALOG DISCARDABLE  32, 32, 190, 124
 STYLE DS_MODALFRAME | DS_3DLOOK | DS_CONTEXTHELP | WS_POPUP | WS_VISIBLE | 
     WS_CAPTION | WS_SYSMENU
@@ -286,8 +287,8 @@ BEGIN
     CONTROL         "window",IDC_COLOUR_BACK,"Button",BS_OWNERDRAW,74,75,26,
                     11,WS_EX_STATICEDGE
     LTEXT           "Font colour:",IDC_STAT_FONT,16,92,45,9
-    CONTROL         "font",IDC_COLOUR_FONT,"Button",BS_OWNERDRAW,74,91,26,
-                    11,WS_EX_STATICEDGE                    
+    CONTROL         "font",IDC_COLOUR_FONT,"Button",BS_OWNERDRAW,74,91,26,11,
+                    WS_EX_STATICEDGE
     GROUPBOX        "Secondary font",IDC_STATIC,117,7,101,102,WS_GROUP
     CONTROL         "ANSI fi&xed width",IDC_FONT_SECONDARY,"Button",
                     BS_AUTORADIOBUTTON | WS_GROUP,126,19,75,10
@@ -306,21 +307,14 @@ BEGIN
     LTEXT           "&Selection margin width:",IDC_STATIC,15,128,82,16
     EDITTEXT        IDC_EDIT_SM_WIDTH,94,127,24,12,ES_CENTER | 
                     ES_AUTOHSCROLL
-    LTEXT           "&Transparency %:",IDC_STAT_TRANS,129,
-                    128,58,16
+    LTEXT           "&Transparency %:",IDC_STAT_TRANS,129,128,58,16
     EDITTEXT        IDC_EDIT_TRANSPARENT,185,127,24,12,ES_CENTER | 
                     ES_AUTOHSCROLL
-    CONTROL         "Use def&ault toolbar style",
-                    IDC_FLAT_TOOLBAR,"Button",BS_AUTOCHECKBOX | BS_MULTILINE | 
-                    WS_TABSTOP,16,143,176,9
+    CONTROL         "Use def&ault toolbar style",IDC_FLAT_TOOLBAR,"Button",
+                    BS_AUTOCHECKBOX | BS_MULTILINE | WS_TABSTOP,16,143,176,9
 END
 
-#if defined(APSTUDIO_INVOKED) || defined(USE_RICH_EDIT)
-#if defined(APSTUDIO_INVOKED)
-IDD_PROPPAGE_A1$(USE_RICH_EDIT) DIALOGEX 0, 0, 225, 167
-#else
 IDD_PROPPAGE_A1 DIALOGEX 0, 0, 225, 167
-#endif
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Advanced"
 FONT 8, "MS Sans Serif", 0, 0, 0x1
@@ -371,7 +365,6 @@ BEGIN
     COMBOBOX        IDC_COMBO_FORMAT,163,146,55,63,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
 END
-#endif
 
 IDD_PROPPAGE_A2 DIALOG DISCARDABLE  0, 0, 225, 167
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
@@ -400,7 +393,8 @@ BEGIN
     EDITTEXT        IDC_MACRO_9,150,71,59,12,ES_AUTOHSCROLL
     LTEXT           "Alt + &0:",IDC_STATIC,118,90,28,8
     EDITTEXT        IDC_MACRO_10,150,88,59,12,ES_AUTOHSCROLL
-    GROUPBOX        "Language for menus, dialogs and messages",IDC_STATIC,7,113,211,47
+    GROUPBOX        "Language for menus, dialogs and messages",IDC_STATIC,7,
+                    113,211,47
     CONTROL         "&Default (English)",IDC_RADIO_LANG_DEFAULT,"Button",
                     BS_AUTORADIOBUTTON | BS_NOTIFY | WS_GROUP,17,128,72,10
     CONTROL         "&Language plugin:",IDC_RADIO_LANG_PLUGIN,"Button",
@@ -555,18 +549,6 @@ BEGIN
         HORZGUIDE, 149
     END
 
-    "IDD_PROPPAGE_A1$(USE_RICH_EDIT)", DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 218
-        VERTGUIDE, 114
-        VERTGUIDE, 119
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 160
-        HORZGUIDE, 36
-        HORZGUIDE, 49
-    END
-
     IDD_PROPPAGE_A2, DIALOG
     BEGIN
         LEFTMARGIN, 7
@@ -646,7 +628,7 @@ BEGIN
         MENUITEM SEPARATOR
         POPUP "&Launch"
         BEGIN
-            MENUITEM "New W&indow\tCtrl+I",       ID_NEW_INSTANCE
+            MENUITEM "New W&indow\tCtrl+I",         ID_NEW_INSTANCE
             MENUITEM SEPARATOR
             MENUITEM "&Primary Viewer\tCtrl+L",     ID_FILE_LAUNCHVIEWER
             MENUITEM "&Secondary Viewer\tCtrl+J",   ID_LAUNCH_SECONDARY_VIEWER
@@ -661,7 +643,7 @@ BEGIN
             MENUITEM "&UNIX Text (LF)\tCtrl+2",     ID_UNIX_FILE
             MENUITEM "Un&icode\tCtrl+3",            ID_UNICODE_FILE
             MENUITEM "Unicode (&Big Endian)\tCtrl+4", ID_UNICODE_BE_FILE
-            MENUITEM "UTF-&8 w/BOM (CR+LF)\tCtrl+5",        ID_UTF_8_FILE
+            MENUITEM "UTF-&8 w/BOM (CR+LF)\tCtrl+5", ID_UTF_8_FILE
         END
         MENUITEM "&Refresh/Revert\tF5",         ID_RELOAD_CURRENT
         MENUITEM "&Calculate Size\tF12",        ID_SHOWFILESIZE
@@ -802,8 +784,7 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDI_PAD                 ICON    DISCARDABLE     "metapad.ico"
-IDI_EYE                 ICON    DISCARDABLE     "eye3.ico"
+IDI_PAD                 ICON    DISCARDABLE     "icon3.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -818,13 +799,7 @@ IDB_DROP_ARROW          BITMAP  DISCARDABLE     "drop_arrow.bmp"
 // Cursor
 //
 
-#if defined(APSTUDIO_INVOKED) || defined(USE_RICH_EDIT)
-#if defined(APSTUDIO_INVOKED)
-IDC_MYHAND$(USE_RICH_EDIT) CURSOR  DISCARDABLE     "linkhand.cur"
-#else
-IDC_MYHAND                CURSOR  DISCARDABLE     "linkhand.cur"
-#endif
-#endif
+IDC_MYHAND$()           CURSOR  DISCARDABLE     "linkhand.cur"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -918,7 +893,8 @@ BEGIN
     VK_MULTIPLY,    ID_HACKER,              VIRTKEY, CONTROL, NOINVERT
     VK_RETURN,      ID_VIEW_OPTIONS,        VIRTKEY, ALT, NOINVERT
     VK_RETURN,      ID_SHIFT_ENTER,         VIRTKEY, SHIFT, NOINVERT
-    VK_RETURN,      ID_CONTROL_SHIFT_ENTER, VIRTKEY, CONTROL, SHIFT, NOINVERT
+    VK_RETURN,      ID_CONTROL_SHIFT_ENTER, VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
     VK_RIGHT,       ID_SCROLLRIGHT,         VIRTKEY, ALT, NOINVERT
     VK_SPACE,       ID_EDIT_SELECTWORD,     VIRTKEY, CONTROL, NOINVERT
     VK_TAB,         ID_INDENT,              VIRTKEY, NOINVERT
@@ -1055,7 +1031,7 @@ BEGIN
     IDS_RICHED_MISSING_ERROR 
                             "metapad requires RICHED20.DLL to be installed on your system.\n\nSee the FAQ on the website for further information."
     IDS_COMMAND_LINE_OPTIONS 
-	"Usage:  metapad [/i | /m | /v | /s] [/p | /g row:col | /e] [filename]\n\nOption descriptions:\n\n\t/i - force INI mode for settings\n\t/m - migrate all registry settings to INI file\n\t/g row:col - goto position at row and column\n\t/e - goto end of file\n\t/p - print file\n\t/v - disable plugin version checking\n\t/s - skip loading language plugin"
+                            "Usage:  metapad [/i | /m | /v | /s] [/p | /g row:col | /e] [filename]\n\nOption descriptions:\n\n\t/i - force INI mode for settings\n\t/m - migrate all registry settings to INI file\n\t/g row:col - goto position at row and column\n\t/e - goto end of file\n\t/p - print file\n\t/v - disable plugin version checking\n\t/s - skip loading language plugin"
     IDS_GLOBALLOCK_ERROR    "GlobalLock failed"
     IDS_CLIPBOARD_UNLOCK_ERROR 
                             "There was an error unlocking the clipboard memory."

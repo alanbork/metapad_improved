@@ -19,6 +19,8 @@
 /*                                                                          */
 /****************************************************************************/
 
+#define USE_RICH_EDIT
+
 #define WIN32_LEAN_AND_MEAN
 #define _WIN32_WINNT 0x0400
 
@@ -99,7 +101,7 @@ extern atoi(const char*);
 #define STATUS_FONT_CONST 1.4
 
 #ifdef USE_RICH_EDIT
-#define RECENTPOS (options.bReadOnlyMenu ? 15 : 14)
+#define RECENTPOS (options.bReadOnlyMenu ? 15 : 14) // position in menu (of the file menu) of the recent MRU submenu; not used if it's top-level
 #define CONVERTPOS 8
 #else
 #define RECENTPOS (options.bReadOnlyMenu ? 14 : 13)
@@ -107,9 +109,9 @@ extern atoi(const char*);
 #endif
 
 #define FILEFORMATPOS (options.bReadOnlyMenu ? 8 : 7)
-#define EDITPOS (options.bRecentOnOwn ? 2 : 1)
+#define EDITPOS 1 //(options.bRecentOnOwn ? 2 : 1) // no longer variable because we moved teh recents menu
 #define READONLYPOS 4
-#define FAVEPOS (options.bRecentOnOwn ? 3 : 2)
+#define FAVEPOS 2//(options.bRecentOnOwn ? 3 : 2) // same as above
 
 #define ID_CLIENT 100
 #define ID_STATUSBAR 101
@@ -283,7 +285,7 @@ typedef struct tag_options {
 	BOOL bNoWarningPrompt;
 	BOOL bUnFlatToolbar;
 	BOOL bStickyWindow;
-	BOOL bReadOnlyMenu;
+	BOOL bReadOnlyMenu; // is there a "read only" menu option on the file menu
 	UINT nStatusFontWidth;
 	UINT nSelectionMarginWidth;
 	UINT nMaxMRU;
@@ -640,7 +642,8 @@ void UpdateCaption(void)
 	SetWindowText(hwnd, szBuffer);
 }
 
-void LoadFileFromMenu(WORD wMenu, BOOL bMRU)
+
+void LoadFileFromMenu(WORD wMenu, BOOL bMRU) // loads a file either from favorites or MRU list
 {
 	HMENU hmenu = GetMenu(hwnd);
 	HMENU hsub = NULL;
@@ -652,7 +655,7 @@ void LoadFileFromMenu(WORD wMenu, BOOL bMRU)
 
 	if (bMRU) {
 		if (options.bRecentOnOwn)
-			hsub = GetSubMenu(hmenu, 1);
+			hsub = GetSubMenu(hmenu, GetMenuItemCount(hmenu) - 1); // TODO more general way to specify, but tested, working
 		else
 			hsub = GetSubMenu(GetSubMenu(hmenu, 0), RECENTPOS);
 	}
@@ -2155,7 +2158,7 @@ void LoadOptions(void)
 	options.bReadOnlyMenu = FALSE;
 	//options.nStatusFontWidth = 16;
 	options.nSelectionMarginWidth = 10;
-	options.nMaxMRU = 8;
+	options.nMaxMRU = 16;
 	options.nFormatIndex = 0;
 	options.nTransparentPct = 25;
 	options.BackColour = GetSysColor(COLOR_WINDOW);
@@ -2699,6 +2702,27 @@ void SaveMenusAndData(void)
 	}
 }
 
+#include <stdio.h>
+void dbg(const char *format, ...) // alan's tool for showing some text for debugging purposes. 
+{
+	char text[1024];    
+	MENUITEMINFO mii;
+
+	va_list args;
+    va_start(args, format);
+
+    vsprintf(text, format, args);
+    va_end(args);
+	
+	mii.cbSize = sizeof(MENUITEMINFO);
+
+    mii.fMask = 0x00000040; // We are setting the string text
+    mii.dwTypeData = text; // The new text
+    
+    SetMenuItemInfo(GetMenu(hwnd), 4, TRUE, &mii); // The fByPosition parameter is TRUE because we are using the 0-based index
+	DrawMenuBar(hwnd);
+}
+
 void SaveMRUInfo(LPCTSTR szFullPath)
 {
 	HKEY key = NULL;
@@ -2707,6 +2731,8 @@ void SaveMRUInfo(LPCTSTR szFullPath)
 	TCHAR szTopVal[MAXFN];
 	DWORD dwBufferSize;
 	UINT i = 1;
+
+	dbg("options.nMaxMRU %i", options.nMaxMRU);
 
 	if (options.nMaxMRU == 0)
 		return;	
@@ -2798,44 +2824,66 @@ void PopulateFavourites(void)
 	}
 }
 
-void PopulateMRUList(void)
+void PopulateMRUList(void) // locate and fill the MRU menu with entries
 {
 	HKEY key = NULL;
 	DWORD nPrevSave = 0;
 	TCHAR szBuffer[MAXFN+4];
 	TCHAR szBuff2[MAXFN];
 	HMENU hmenu = GetMenu(hwnd);
-	HMENU hsub;
+	HMENU hrecent; // the menu that "Recent.." shows up on
+	HMENU hsub; // the popup submenu with each file in it
 	TCHAR szKey[7];
 	MENUITEMINFO mio;
+	int mrupos;
 
+	//  
 	if (options.bRecentOnOwn)
-		hsub = GetSubMenu(hmenu, 1);
+		{
+		mrupos = GetMenuItemCount(hmenu) - 1;
+		hrecent = hmenu;
+		hsub = GetSubMenu(hmenu, mrupos);
+		}
 	else
+		{
 		hsub = GetSubMenu(GetSubMenu(hmenu, 0), RECENTPOS);
+		hrecent = GetSubMenu(hmenu, 0);
+		mrupos = RECENTPOS;
+		}
 
-	if (options.nMaxMRU == 0) {
+	EnableMenuItem(hrecent, mrupos, MF_BYPOSITION | (options.nMaxMRU == 0 ? MF_GRAYED : MF_ENABLED)); 
+
+
+//	if (options.nMaxMRU == 0) {
+//		EnableMenuItem(hrecent, mrupos, MF_BYPOSITION | MF_GRAYED); 
+		/* old position based code
 		if (options.bRecentOnOwn)
 			EnableMenuItem(hmenu, 1, MF_BYPOSITION | MF_GRAYED);
 		else
 			EnableMenuItem(GetSubMenu(hmenu, 0), RECENTPOS, MF_BYPOSITION | MF_GRAYED);
 		return;	
-	}
-	else {
+		*/
+//	}
+//	else {
+//		EnableMenuItem(hrecent, mrupos, MF_BYPOSITION | MF_ENABLED);
+		/*
 		if (options.bRecentOnOwn)
+
 			EnableMenuItem(hmenu, 1, MF_BYPOSITION | MF_ENABLED);
 		else
 			EnableMenuItem(GetSubMenu(hmenu, 0), RECENTPOS, MF_BYPOSITION | MF_ENABLED);
-	}
+			*/
+//	}
+
 
 	if (!g_bIniMode && RegCreateKeyEx(HKEY_CURRENT_USER, STR_REGKEY, 0, NULL, 0, KEY_ALL_ACCESS, NULL, &key, &nPrevSave) != ERROR_SUCCESS)
 		ReportLastError();
 
 	if (g_bIniMode || nPrevSave == REG_OPENED_EXISTING_KEY) {
-		UINT i, num = 1, cnt = 0;
+		UINT i, num = 1, cnt = 0; 
 		DWORD dwBufferSize = sizeof(int);
 		
-		while (GetMenuItemCount(hsub)) {
+		while (GetMenuItemCount(hsub)) { // remove current entires on submenu
 			DeleteMenu(hsub, 0, MF_BYPOSITION);
 		}
 
@@ -4066,7 +4114,7 @@ void FixReadOnlyMenu(void)
 	}
 }
 
-void FixMRUMenus(void)
+void FixMRUMenus(void) // put the MRU where it should be depending on options: under file, or as top level
 {
 	HMENU hmenu = GetMenu(hwnd);
 	MENUITEMINFO mio;
@@ -4076,9 +4124,9 @@ void FixMRUMenus(void)
 	mio.fType = MFT_STRING;
 	mio.hSubMenu = CreateMenu();	
 
-	if (options.bRecentOnOwn) {
+	if (options.bRecentOnOwn) { // recent menu should be shown as a top-level menu
 		mio.dwTypeData = GetString(IDS_RECENT_MENU);
-		InsertMenuItem(hmenu, 1, TRUE, &mio);
+		InsertMenuItem(hmenu,  GetMenuItemCount(hmenu), TRUE, &mio); // places menu as the last item 
 		if (hrecentmenu)
 			DestroyMenu(hrecentmenu);
 		hrecentmenu = mio.hSubMenu;
@@ -4086,7 +4134,7 @@ void FixMRUMenus(void)
 		DeleteMenu(GetSubMenu(hmenu, 0), RECENTPOS, MF_BYPOSITION);
 		DeleteMenu(GetSubMenu(hmenu, 0), RECENTPOS, MF_BYPOSITION);
 	}
-	else {
+	else {  // menu should be shown as part of file menu
 		mio.dwTypeData = GetString(IDS_RECENT_FILES_MENU);
 		InsertMenuItem(GetSubMenu(hmenu, 0), RECENTPOS, TRUE, &mio);
 		if (hrecentmenu)
@@ -4096,7 +4144,7 @@ void FixMRUMenus(void)
 		mio.fType = MFT_SEPARATOR;
 		mio.fMask = MIIM_TYPE;
 		InsertMenuItem(GetSubMenu(hmenu, 0), RECENTPOS + 1, TRUE, &mio);
-		DeleteMenu(hmenu, 1, MF_BYPOSITION);
+		DeleteMenu(hmenu, GetMenuItemCount(hmenu) -1, MF_BYPOSITION); // removes menu from it's location as the last item
 	}
 	DrawMenuBar(hwnd);
 }
@@ -6126,9 +6174,10 @@ endinsertfile:
 				UpdateStatus();
 #endif
 				break;
-			case ID_VIEW_OPTIONS:
+			case ID_VIEW_OPTIONS: // show settings dialog
 				{
-					PROPSHEETHEADER psh;
+
+				PROPSHEETHEADER psh;
 					PROPSHEETPAGE pages[4];
 
 					ZeroMemory(&pages[0], sizeof(pages[0]));
@@ -6153,9 +6202,10 @@ endinsertfile:
 					pages[2].dwSize = sizeof(PROPSHEETPAGE);
 					//pages[2].dwSize = PROPSHEETPAGE_V1_SIZE;
 
-					pages[2].hInstance = hinstLang;
+					pages[2].hInstance = hinstLang; 
 					pages[2].dwFlags = PSP_DEFAULT;
 					pages[2].pszTemplate = MAKEINTRESOURCE(IDD_PROPPAGE_A2);
+					pages[2].dwSize = sizeof(PROPSHEETPAGE); // AER added this, seems like it should be set to something like elsewhere, and also this page was intermittant
 					pages[2].pfnDlgProc = (DLGPROC)Advanced2PageProc;
 
 					ZeroMemory(&pages[3], sizeof(pages[3]));
@@ -6164,11 +6214,8 @@ endinsertfile:
 
 					pages[3].hInstance = hinstLang;
 					pages[3].dwFlags = PSP_DEFAULT;
-#ifdef USE_RICH_EDIT
 					pages[3].pszTemplate = MAKEINTRESOURCE(IDD_PROPPAGE_A1);
-#else
-					pages[3].pszTemplate = MAKEINTRESOURCE(IDD_PROPPAGE_A1_LE);
-#endif
+
 					pages[3].pfnDlgProc = (DLGPROC)AdvancedPageProc;
 
 					ZeroMemory(&psh, sizeof(psh));
@@ -6182,6 +6229,11 @@ endinsertfile:
 					psh.pszCaption = GetString(IDS_SETTINGS_TITLE);
 					psh.ppsp = (LPCPROPSHEETPAGE) pages;
 					psh.pfnCallback = SheetInitProc;
+
+		
+
+
+		
 
 					{
 						int retval;
@@ -6205,6 +6257,7 @@ endinsertfile:
 */
 						option_struct oldOptions;
 						memcpy(&oldOptions, &options, sizeof(option_struct));
+						
 						LoadOptions();
 /*
 						if (bPrimaryFont) {
@@ -7816,15 +7869,16 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	SetClientFont(bPrimaryFont);
 
 	uFindReplaceMsg = RegisterWindowMessage(FINDMSGSTRING);
-
+	
+	// update options menus
 	hmenu = GetMenu(hwnd);
 	mio.cbSize = sizeof(MENUITEMINFO);
 	mio.fMask = MIIM_STATE;
-	if (bWordWrap) {
+	if (bWordWrap) {	// update wordwrap state
 		mio.fState = MFS_CHECKED;
 		SetMenuItemInfo(hmenu, ID_EDIT_WORDWRAP, 0, &mio);
 	}
-	if (!bSmartSelect) {
+	if (!bSmartSelect) { // update smart select state
 		mio.fState = MFS_UNCHECKED;
 		SetMenuItemInfo(hmenu, ID_SMARTSELECT, 0, &mio);
 	}

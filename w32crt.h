@@ -1,3 +1,4 @@
+/* // ALAN NOT needed for vc6 build
 void __cdecl WinMainCRTStartup(void)
 {
     int mainret;
@@ -32,7 +33,7 @@ void __cdecl WinMainCRTStartup(void)
                        ? StartupInfo.wShowWindow : SW_SHOWDEFAULT );
 
     ExitProcess(mainret);
-}
+}*/
 /*
 int __cdecl _isctype(int c , int mask) 
 {

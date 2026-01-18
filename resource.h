@@ -2,7 +2,6 @@
 // Microsoft Developer Studio generated include file.
 // Used by metapad.rc
 //
-
 #define IDS_VERSION_SYNCH               1
 #define IDS_PLUGIN_LANGUAGE             2
 #define IDS_PLUGIN_RELEASE              3
@@ -116,7 +115,7 @@
 #define IDD_PROPPAGE_GENERAL            112
 #define IDD_ABORT_PRINT                 113
 #define IDD_GOTO                        114
-#define IDC_MYHAND                        122
+#define IDC_MYHAND                      122
 #define IDD_PROPPAGE_VIEW               124
 #define IDB_TOOLBAR                     126
 #define IDD_FAV_NAME                    128
@@ -124,6 +123,9 @@
 #define IDR_MENU                        130
 #define IDB_DROP_ARROW                  131
 #define IDR_POPUP                       131
+#define IDI_ICON1                       135
+#define IDI_ICON2                       137
+#define IDI_ICON3                       138
 #define IDC_STATICX                     1005
 #define IDC_EDIT_URL                    1007
 #define IDC_EDIT_PLUGIN_RELEASE         1008
@@ -359,7 +361,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NO_MFC                     1
-#define _APS_NEXT_RESOURCE_VALUE        135
+#define _APS_NEXT_RESOURCE_VALUE        139
 #define _APS_NEXT_COMMAND_VALUE         40109
 #define _APS_NEXT_CONTROL_VALUE         1086
 #define _APS_NEXT_SYMED_VALUE           107

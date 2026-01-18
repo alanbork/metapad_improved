@@ -6,7 +6,7 @@ make regarding this distribution:
    General Public License. This fact directly impacts 
    what you can and cannot do with the source code. See 
    the file COPYING-LICENSE.txt (included in this 
-   distribution) which will explain things in detail.
+   distribution) which will explain things in detail. 
 
 2) This source code in its current state is uncommented, 
    unmodular, and generally not very understandable
