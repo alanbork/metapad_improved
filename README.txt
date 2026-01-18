@@ -1,3 +1,6 @@
+NOTE: work in progress to make minimal improvements to metapad. 
+Original readme continues below. 
+
 This package contains the source code to metapad 
 (version 3.51). What follows is a few points I'd like to
 make regarding this distribution:
