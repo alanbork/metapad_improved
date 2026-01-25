@@ -1,19 +1,24 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
-<assemblyIdentity
-    version="1.0.0.0"
-    processorArchitecture="X86"
-    name="metapad"
-    type="win32"
-/>
-<description>metapad XP</description>
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?> 
+
+<!-- make custom resource type 24, add new with ID=1, and then paste this in -->
+
+<!-- Hi DPI section -->
+<assembly manifestVersion="1.0" xmlns="urn:schemas-microsoft-com:asm.v1" xmlns:asmv3="urn:schemas-microsoft-com:asm.v3">
+  <asmv3:application>
+    <asmv3:windowsSettings>
+      <dpiAware xmlns="http://schemas.microsoft.com/SMI/2005/WindowsSettings">True/PM</dpiAware>
+      <dpiAwareness xmlns="http://schemas.microsoft.com/SMI/2016/WindowsSettings">PerMonitorV2, PerMonitor</dpiAwareness>
+    </asmv3:windowsSettings>
+  </asmv3:application>
+
+<!-- new look theme enabled -->
 <dependency>
     <dependentAssembly>
         <assemblyIdentity
             type="win32"
             name="Microsoft.Windows.Common-Controls"
             version="6.0.0.0"
-            processorArchitecture="X86"
+            processorArchitecture="*"
             publicKeyToken="6595b64144ccf1df"
             language="*"
         />
