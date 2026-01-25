@@ -28,8 +28,6 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 
 1                       24      MOVEABLE PURE   "metapad.manifest"
 
-
-
 /////////////////////////////////////////////////////////////////////////////
 //
 // Dialog
@@ -58,63 +56,6 @@ BEGIN
     PUSHBUTTON      "Cancel",IDCANCEL,87,24,35,14
 END
 
-/*
-#if defined(APSTUDIO_INVOKED) || defined(NO_RICH_EDIT)
-#if defined(APSTUDIO_INVOKED)
-IDD_PROPPAGE_A1_LE$(NO_RICH_EDIT) DIALOGEX 0, 0, 225, 167
-#else
-IDD_PROPPAGE_A1_LE DIALOGEX 0, 0, 225, 167
-#endif
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Advanced"
-FONT 8, "MS Sans Serif", 0, 0, 0x1
-BEGIN
-    CONTROL         "&Separate recent files menu",IDC_RECENT,"Button",
-                    BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,7,7,107,8
-    CONTROL         "&Enable read only menu item",IDC_READONLY_MENU,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,19,107,8
-    CONTROL         "F&ind/replace use current font",IDC_CURRENT_FIND_FONT,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,32,107,8
-    CONTROL         "&Context menu moves cursor",IDC_CONTEXT_CURSOR,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,45,107,8
-    CONTROL         "Disa&ble favourites menu",IDC_NO_FAVES,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,58,107,8
-    CONTROL         "&Launch viewer for large files",IDC_ALWAYS_LAUNCH,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,71,107,8
-    CONTROL         "Use default &printer font",IDC_DEFAULT_PRINT,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,84,107,8
-    CONTROL         "Use fi&xed window position:",IDC_STICKY_WINDOW,"Button",
-                    BS_AUTOCHECKBOX | BS_NOTIFY | WS_TABSTOP,7,112,99,8
-    CONTROL         "Hide &go to offset",IDC_GOTO_OFFSET,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,119,7,99,8
-    CONTROL         "Disable smart &home",IDC_SMARTHOME,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,119,19,99,8
-    CONTROL         "Don't a&uto-save extensions",IDC_NO_SAVE_EXTENSIONS,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,119,32,99,8
-    CONTROL         "Skip load &warning prompts",IDC_PROMPT_BINARY,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,119,45,99,8
-    CONTROL         "Don't insert &time with date",IDC_INSERT_TIME,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,119,58,99,8
-    CONTROL         "Pri&nt using secondary font",IDC_SECONDARY_PRINT_FONT,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,119,71,99,8
-    CONTROL         "Don't s&ave find history",IDC_NO_SAVE_HISTORY,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,119,84,99,8
-    CONTROL         "D&on't auto-select on find",IDC_NO_FIND_SELECT,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,119,97,99,8
-    PUSHBUTTON      "Sa&ve Window Position",IDC_BUTTON_STICK,119,111,99,13
-    PUSHBUTTON      "Clear &Recent Files...",IDC_BUTTON_CLEAR_RECENT,7,127,
-                    83,14
-    PUSHBUTTON      "Clear &Find History...",IDC_BUTTON_CLEAR_FIND,7,146,83,
-                    14
-    LTEXT           "Recent files to re&member:",IDC_STATIC,102,129,82,8
-    EDITTEXT        IDC_EDIT_MAX_MRU,194,127,24,12,ES_CENTER | 
-                    ES_AUTOHSCROLL | ES_NUMBER
-    LTEXT           "&Default file format:",IDC_STATIC,102,148,58,8
-    COMBOBOX        IDC_COMBO_FORMAT,163,146,55,63,CBS_DROPDOWNLIST | 
-                    WS_VSCROLL | WS_TABSTOP
-END
-#endif
-*/
 IDD_PAGE_SETUP DIALOG DISCARDABLE  32, 32, 190, 124
 STYLE DS_MODALFRAME | DS_3DLOOK | DS_CONTEXTHELP | WS_POPUP | WS_VISIBLE | 
     WS_CAPTION | WS_SYSMENU
@@ -137,18 +78,20 @@ BEGIN
     PUSHBUTTON      "Cancel",IDCANCEL,135,103,48,14
 END
 
-IDD_ABOUT DIALOGEX 0, 0, 151, 78
+IDD_ABOUT DIALOGEX 0, 0, 151, 146
 STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 CAPTION "metapad"
-FONT 8, "MS Sans Serif", 0, 0, 0x1
+FONT 8, "MS Sans Serif"
 BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,53,56,44,15
+    CTEXT           "Static",IDC_STATIC_COPYRIGHT2,7,44,137,8
+    DEFPUSHBUTTON   "OK",IDOK,53,119,44,15
     EDITTEXT        IDC_EDIT_URL,43,17,102,10,ES_CENTER | ES_NOHIDESEL | 
                     ES_READONLY | NOT WS_BORDER,WS_EX_STATICEDGE
     RTEXT           "metapad X.X",IDC_STATICX,41,7,103,8
     ICON            IDI_PAD,IDC_DLGICON,7,7,20,20,SS_NOTIFY
     CTEXT           "Static",IDC_STATIC_COPYRIGHT,7,34,137,8
-    CTEXT           "Static",IDC_STATIC_COPYRIGHT2,7,44,137,8
+    CTEXT           "© 1999-2011 Alexander Davidson",IDC_STATIC_COPYRIGHT3,7,
+                    56,137,53
 END
 
 IDD_FAV_NAME DIALOG DISCARDABLE  0, 0, 228, 46
@@ -455,21 +398,6 @@ BEGIN
         BOTTOMMARGIN, 38
     END
 
-    "IDD_PROPPAGE_A1_LE$(NO_RICH_EDIT)", DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 218
-        VERTGUIDE, 114
-        VERTGUIDE, 119
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 160
-        HORZGUIDE, 36
-        HORZGUIDE, 49
-        HORZGUIDE, 62
-        HORZGUIDE, 76
-        HORZGUIDE, 116
-    END
-
     IDD_PAGE_SETUP, DIALOG
     BEGIN
         LEFTMARGIN, 7
@@ -485,7 +413,7 @@ BEGIN
         RIGHTMARGIN, 144
         VERTGUIDE, 41
         TOPMARGIN, 7
-        BOTTOMMARGIN, 71
+        BOTTOMMARGIN, 139
         HORZGUIDE, 17
         HORZGUIDE, 27
     END
@@ -724,6 +652,7 @@ BEGIN
         MENUITEM "&Always On Top\tAlt+Home",    ID_ALWAYSONTOP
         MENUITEM "S&mart Select\tCtrl+M",       ID_SMARTSELECT, CHECKED
         MENUITEM "T&ransparent Mode\tCtrl+U",   ID_TRANSPARENT
+        MENUITEM "&Single File Instance",       ID_VIEW_SINGLEFILEINSTANCE
         MENUITEM SEPARATOR
         MENUITEM "Show &Toolbar\tCtrl+T",       ID_SHOWTOOLBAR
         MENUITEM "Show Status &Bar\tCtrl+B",    ID_SHOWSTATUS
