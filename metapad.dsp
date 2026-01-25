@@ -155,6 +155,10 @@ SOURCE=.\toolbar.bmp
 # End Group
 # Begin Source File
 
+SOURCE=.\metapad.manifest
+# End Source File
+# Begin Source File
+
 SOURCE=.\ReadMe.txt
 # End Source File
 # End Target

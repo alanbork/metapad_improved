@@ -43,6 +43,7 @@
 #include <commctrl.h> 
 #include <winuser.h>
 #include <tchar.h> 
+#include <winuser.h> // AER for single instance code
 
 #ifndef TBSTYLE_FLAT
 #define TBSTYLE_FLAT 0x0800
@@ -135,6 +136,8 @@ extern atoi(const char*);
 #define LWA_COLORKEY 0x00000001
 #define LWA_ALPHA 0x00000002
 
+#define ID_WM_COPYDATA_CHECK_INSTANCE (WM_APP + 1)
+
 ///// Strings /////
 
 #ifdef BUILD_METAPAD_UNICODE
@@ -145,7 +148,7 @@ extern atoi(const char*);
 #endif
 #else
 #ifdef USE_RICH_EDIT
-#define STR_ABOUT_NORMAL _T("metapad 3.6")
+#define STR_ABOUT_NORMAL _T("metapad 3.7")
 #else
 #define STR_ABOUT_NORMAL _T("metapad LE 3.6")
 #endif
@@ -163,13 +166,14 @@ extern atoi(const char*);
 #define STR_URL _T("http://liquidninja.com/metapad")
 #define STR_REGKEY _T("SOFTWARE\\metapad")
 #define STR_FAV_APPNAME _T("Favourites")
-#define STR_COPYRIGHT _T("© 1999-2011 Alexander Davidson")
+#define STR_COPYRIGHT _T("©2026 Alan Robinson")
 
 ///// Macros /////
 
 #define ERROROUT(_x) MessageBox(hwnd, _x, STR_METAPAD, MB_OK | MB_ICONEXCLAMATION)
 #define MSGOUT(_x) MessageBox(hwnd, _x, STR_METAPAD, MB_OK | MB_ICONINFORMATION)
 #define DBGOUT(_x, _y) MessageBox(hwnd, _x, _y, MB_OK | MB_ICONEXCLAMATION)
+
 
 ///// Typedefs /////
 #include <pshpack1.h>
@@ -308,6 +312,7 @@ typedef struct tag_options {
 	BOOL bHideScrollbars;
 #endif
 	BOOL bNoFaves;
+	BOOL bSingleFileInstance; // AER new flag for "Single Instance per file" option
 	BOOL bPrintWithSecondaryFont;
 	BOOL bNoSaveHistory;
 	BOOL bNoFindAutoSelect;
@@ -365,6 +370,42 @@ void SwitchReadOnly(BOOL bNewVal);
 BOOL EncodeWithEscapeSeqs(TCHAR* szText);
 
 ///// Implementation /////
+
+#include <stdio.h>
+void dbgBox(const char *format, ...) // alan's tool for showing some text for debugging purposes. 
+{
+	char text[1024];    
+	
+
+	va_list args;
+    va_start(args, format);
+
+    vsprintf(text, format, args);
+    va_end(args);
+	
+	DBGOUT(text, "debug note");
+}
+
+
+void dbg(const char *format, ...) // alan's tool for showing some text for debugging purposes. 
+{
+	char text[1024];    
+	MENUITEMINFO mii;
+
+	va_list args;
+    va_start(args, format);
+
+    vsprintf(text, format, args);
+    va_end(args);
+	
+	mii.cbSize = sizeof(MENUITEMINFO);
+
+    mii.fMask = 0x00000040; // We are setting the string text
+    mii.dwTypeData = text; // The new text
+    
+    SetMenuItemInfo(GetMenu(hwnd), 4, TRUE, &mii); // The fByPosition parameter is TRUE because we are using the 0-based index
+	DrawMenuBar(hwnd);
+}
 
 LPTSTR GetString(UINT uID)
 {
@@ -2138,6 +2179,8 @@ void LoadOptions(void)
 	options.bNoSaveHistory = FALSE;
 	options.bNoFindAutoSelect = FALSE;
 	options.bNoFaves = FALSE;
+	options.bSingleFileInstance = TRUE; // AER set default for "Single Instance per file" option
+
 
 	lstrcpy(options.szQuote, "> ");
 	ZeroMemory(options.szArgs, sizeof(options.szArgs));
@@ -2217,6 +2260,8 @@ void LoadOptions(void)
 		LoadOptionNumeric(key, _T("bSaveDirectory"), (LPBYTE)&options.bSaveDirectory, dwBufferSize);
 		LoadOptionNumeric(key, _T("bLaunchClose"), (LPBYTE)&options.bLaunchClose, dwBufferSize);
 		LoadOptionNumeric(key, _T("bNoFaves"), (LPBYTE)&options.bNoFaves, dwBufferSize);
+		LoadOptionNumeric(key, _T("bSingleFileInstance"), (LPBYTE)&options.bSingleFileInstance, dwBufferSize);// AER read option for "single instance per file"
+		//dbgBox("bSingleFileInstance from reg = %i", options.bSingleFileInstance);
 #ifndef USE_RICH_EDIT
 		LoadOptionNumeric(key, _T("bDefaultPrintFont"), (LPBYTE)&options.bDefaultPrintFont, dwBufferSize);
 		LoadOptionNumeric(key, _T("bAlwaysLaunch"), (LPBYTE)&options.bAlwaysLaunch, dwBufferSize);
@@ -2445,6 +2490,9 @@ void SaveOptions(void)
 	writeSucceeded &= SaveOption(key, _T("bSaveDirectory"), REG_DWORD, (LPBYTE)&options.bSaveDirectory, sizeof(BOOL));
 	writeSucceeded &= SaveOption(key, _T("bLaunchClose"), REG_DWORD, (LPBYTE)&options.bLaunchClose, sizeof(BOOL));
 	writeSucceeded &= SaveOption(key, _T("bNoFaves"), REG_DWORD, (LPBYTE)&options.bNoFaves, sizeof(BOOL));
+	writeSucceeded &= SaveOption(key, _T("bSingleFileInstance"), REG_DWORD, (LPBYTE)&options.bSingleFileInstance, sizeof(BOOL)); // AER Save option
+	//dbgBox("write to reg bSingleFileInstance = %i, writeSucceeded %i", (LPBYTE)&options.bSingleFileInstance, writeSucceeded);
+
 #ifndef USE_RICH_EDIT
 	writeSucceeded &= SaveOption(key, _T("bDefaultPrintFont"), REG_DWORD, (LPBYTE)&options.bDefaultPrintFont, sizeof(BOOL));
 	writeSucceeded &= SaveOption(key, _T("bAlwaysLaunch"), REG_DWORD, (LPBYTE)&options.bAlwaysLaunch, sizeof(BOOL));
@@ -2702,26 +2750,6 @@ void SaveMenusAndData(void)
 	}
 }
 
-#include <stdio.h>
-void dbg(const char *format, ...) // alan's tool for showing some text for debugging purposes. 
-{
-	char text[1024];    
-	MENUITEMINFO mii;
-
-	va_list args;
-    va_start(args, format);
-
-    vsprintf(text, format, args);
-    va_end(args);
-	
-	mii.cbSize = sizeof(MENUITEMINFO);
-
-    mii.fMask = 0x00000040; // We are setting the string text
-    mii.dwTypeData = text; // The new text
-    
-    SetMenuItemInfo(GetMenu(hwnd), 4, TRUE, &mii); // The fByPosition parameter is TRUE because we are using the 0-based index
-	DrawMenuBar(hwnd);
-}
 
 void SaveMRUInfo(LPCTSTR szFullPath)
 {
@@ -5167,6 +5195,7 @@ int CALLBACK SheetInitProc(HWND hwndDlg, UINT uMsg, LPARAM lParam)
 	return TRUE;
 }	
 
+
 LONG WINAPI MainWndProc(HWND hwndMain, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
 	if (Msg == WM_COMMAND && ID_FAV_RANGE_BASE < LOWORD(wParam) && LOWORD(wParam) <= ID_FAV_RANGE_MAX) {
@@ -5174,7 +5203,17 @@ LONG WINAPI MainWndProc(HWND hwndMain, UINT Msg, WPARAM wParam, LPARAM lParam)
 		return FALSE;
 	}
 	
-	switch(Msg) {
+switch(Msg) {
+	case WM_COPYDATA: // AER new one instance per file code
+		{ // needed for scope reasons to allow def of variable here
+		PCOPYDATASTRUCT pcds = (PCOPYDATASTRUCT)lParam;
+			if (pcds->dwData == ID_WM_COPYDATA_CHECK_INSTANCE) {
+				if (szFile[0] != '\0' && lstrcmp((LPCTSTR)pcds->lpData, szFile) == 0) {
+					return (LRESULT)hwndMain;
+				}
+			}
+			return 0;
+		}
 //	case WM_ERASEBKGND:
 //		return (LRESULT)1;
 	case WM_DESTROY:
@@ -5404,6 +5443,12 @@ LONG WINAPI MainWndProc(HWND hwndMain, UINT Msg, WPARAM wParam, LPARAM lParam)
 					case ID_ALWAYSONTOP:
 						lpttt->lpszText = GetString(IDS_TB_ONTOP);
 						break;
+						/*
+					case ID_VIEW_SINGLEFILEINSTANCE: // BUG: this is for tooltips and is useless.
+						dbgBox("case ID_VIEW_SINGLEFILEINSTANCE: in wrong place?"); 
+						options.bSingleFileInstance = !GetCheckedState(GetMenu(hwndMain), ID_VIEW_SINGLEFILEINSTANCE, TRUE);
+						break;
+						*/
 					case ID_FILE_LAUNCHVIEWER:
 						lpttt->lpszText = GetString(IDS_TB_PRIMARYVIEWER);
 						break;
@@ -6001,6 +6046,7 @@ LONG WINAPI MainWndProc(HWND hwndMain, UINT Msg, WPARAM wParam, LPARAM lParam)
 				SetWindowPos(hwnd, (bAlwaysOnTop ? HWND_TOPMOST : HWND_NOTOPMOST), 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
 				UpdateStatus();
 				break;
+
 			case ID_TRANSPARENT: {
 				if (SetLWA) {
 					bTransparent = !GetCheckedState(GetMenu(hwndMain), ID_TRANSPARENT, TRUE);
@@ -6164,6 +6210,16 @@ endinsertfile:
 					UpdateStatus();
 				}
 				break;
+
+			// AER START: single instance per file
+			case ID_VIEW_SINGLEFILEINSTANCE: 
+				//dbgBox("user selected menu item, toggle option and update check box on single instance per view menu time");
+				options.bSingleFileInstance = !GetCheckedState(GetMenu(hwndMain), ID_VIEW_SINGLEFILEINSTANCE, TRUE);
+				SaveOptions(); // overkill to save everything, but we need to save this option so the next instance can see it.
+				
+				break;
+			// AER END
+
 			case ID_FONT_PRIMARY:
 				bPrimaryFont = !GetCheckedState(GetMenu(hwndMain), ID_FONT_PRIMARY, TRUE);
 				if (!SetClientFont(bPrimaryFont)) {
@@ -7626,6 +7682,42 @@ DWORD WINAPI LoadThread(LPVOID lpParameter)
 	return 0;
 }
 
+// AER START: single instance support
+struct FindOpenMetapadsAndCheckIfFileIsAlreadyOpenArg // arguements to function below
+{
+	TCHAR *szFile;
+	HWND hwnd;
+};
+
+BOOL CALLBACK FindOpenMetapadsAndCheckIfFileIsAlreadyOpen(HWND aHWND, LPARAM lParam) // called by enumwindows 
+{
+	TCHAR szClass[10];
+
+	struct FindOpenMetapadsAndCheckIfFileIsAlreadyOpenArg *pArg = (struct FindOpenMetapadsAndCheckIfFileIsAlreadyOpenArg *)lParam;
+
+	if (aHWND == hwnd) return TRUE; // skip me; return true continues search
+
+	GetClassName(aHWND, szClass, sizeof(szClass));
+
+	if (lstrcmp(szClass, STR_METAPAD) == 0) {
+		COPYDATASTRUCT cds;
+		DWORD dwResult;
+
+		cds.dwData = ID_WM_COPYDATA_CHECK_INSTANCE;
+		cds.cbData = (lstrlen(pArg->szFile) + 1) * sizeof(TCHAR);
+		cds.lpData = pArg->szFile;
+
+		if (SendMessageTimeout(aHWND, WM_COPYDATA, (WPARAM)0, (LPARAM)&cds, SMTO_NORMAL, 1000, &dwResult)) {
+			if (dwResult) { //dbgBox("hwnd that already has file open %i", dwResult);
+				pArg->hwnd = (HWND)dwResult;
+				return FALSE;
+			}
+		}
+	}
+	return TRUE;
+}
+// AER END
+
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
 	WNDCLASS wc;
@@ -7914,6 +8006,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
 	}
 
+	// AER START: 
+	if (options.bSingleFileInstance) {
+		//dbgBox("set the initial menu check for single instance per file to %i", options.bSingleFileInstance);
+		mio.fState = MFS_CHECKED;
+		SetMenuItemInfo(hmenu, ID_VIEW_SINGLEFILEINSTANCE, 0, &mio);
+	}
+	// AER END
+
 	bDirtyFile = FALSE;
 	bDown = TRUE;
 	bWholeWord = FALSE;
@@ -8026,6 +8126,25 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 		GetFullPathName(szFile, MAXFN, szFile, NULL);
 		
+		// AER START: check if file is already open and if so, switch to it
+		if (options.bSingleFileInstance) {			
+			struct FindOpenMetapadsAndCheckIfFileIsAlreadyOpenArg arg;
+			arg.szFile = szFile;
+			arg.hwnd = NULL;
+			
+			EnumWindows(FindOpenMetapadsAndCheckIfFileIsAlreadyOpen, (LPARAM)&arg); // for each open window, call this function
+
+			if (arg.hwnd) { // a window was found!
+				//dbgBox("found %s open already? by %i (i am %i)", szFile, arg.hwnd, hwnd );
+				if (arg.hwnd != hwnd) 
+					{
+					SetForegroundWindow(arg.hwnd);
+					return FALSE; // Quit this instance
+					}
+			}
+		}
+		// AER END
+
 		ExpandFilename(szFile);
 #ifdef USE_RICH_EDIT
 		{
