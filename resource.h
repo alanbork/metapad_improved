@@ -117,7 +117,8 @@
 #define IDD_GOTO                        114
 #define IDC_MYHAND                      122
 #define IDD_PROPPAGE_VIEW               124
-#define IDB_TOOLBAR                     126
+#define IDB_TOOLBAR16                     126
+#define IDB_TOOLBAR24                     127
 #define IDD_FAV_NAME                    128
 #define IDR_ESCAPE_SEQUENCES            129
 #define IDR_MENU                        130

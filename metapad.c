@@ -993,10 +993,11 @@ BOOL GetCheckedState(HMENU hmenu, UINT nID, BOOL bToggle)
 	}
 }
 
+
 void CreateToolbar(void)
 {
 	DWORD dwStyle = WS_VISIBLE | WS_CHILD | WS_CLIPSIBLINGS | TBSTYLE_TOOLTIPS;
-	TBADDBITMAP tbab = {hinstThis, IDB_TOOLBAR};
+	TBADDBITMAP tbab;// = {hinstThis, IDB_TOOLBAR};
 
 	TBBUTTON tbButtons [] = {
 		{0, 0, TBSTATE_ENABLED, TBSTYLE_SEP, 0L, 0},
@@ -1019,9 +1020,7 @@ void CreateToolbar(void)
 		{STD_PASTE, ID_MYEDIT_PASTE, TBSTATE_ENABLED, TBSTYLE_BUTTON, 0L, 0},
 		{0, 0, TBSTATE_ENABLED, TBSTYLE_SEP, 0L, 0},
 		{STD_UNDO, ID_MYEDIT_UNDO, TBSTATE_ENABLED, TBSTYLE_BUTTON, 0L, 0},
-#ifdef USE_RICH_EDIT
 		{STD_REDOW, ID_MYEDIT_REDO, TBSTATE_ENABLED, TBSTYLE_BUTTON, 0L, 0},
-#endif
 		{0, 0, TBSTATE_ENABLED, TBSTYLE_SEP, 0L, 0},
 		{CUSTOMBMPBASE, ID_EDIT_WORDWRAP, TBSTATE_ENABLED, TBSTYLE_CHECK, 0L, 0},
 		{CUSTOMBMPBASE+4, ID_FONT_PRIMARY, TBSTATE_ENABLED, TBSTYLE_BUTTON, 0L, 0},
@@ -1030,12 +1029,34 @@ void CreateToolbar(void)
 		{STD_PROPERTIES, ID_VIEW_OPTIONS, TBSTATE_ENABLED, TBSTYLE_BUTTON, 0L, 0},
 	};
 
+
 	if (!options.bUnFlatToolbar)
 		dwStyle |= TBSTYLE_FLAT;
 
+/* // old toolbar just 16 pixel version
 	toolbar = CreateToolbarEx(hwnd, dwStyle,
 		ID_TOOLBAR, CUSTOMBMPBASE, HINST_COMMCTRL, IDB_STD_SMALL_COLOR, 
 		(LPCTBBUTTON)&tbButtons, NUMBUTTONS, 0, 0, 16, 16, sizeof(TBBUTTON));
+
+*/
+
+	// AER START 
+	if (bHighDPI) { // change which toolbar is shown depending on DPI mode
+		tbab.hInst = hinstThis;
+		tbab.nID = IDB_TOOLBAR24;
+		toolbar = CreateToolbarEx(hwnd, dwStyle,
+			ID_TOOLBAR, CUSTOMBMPBASE, HINST_COMMCTRL, IDB_STD_LARGE_COLOR,
+			(LPCTBBUTTON)&tbButtons, NUMBUTTONS, 24, 24, 24, 24, sizeof(TBBUTTON));
+	}
+	else {
+		tbab.hInst = hinstThis;
+		tbab.nID = IDB_TOOLBAR16;
+		toolbar = CreateToolbarEx(hwnd, dwStyle,
+			ID_TOOLBAR, CUSTOMBMPBASE, HINST_COMMCTRL, IDB_STD_SMALL_COLOR,
+			(LPCTBBUTTON)&tbButtons, NUMBUTTONS, 0, 0, 16, 16, sizeof(TBBUTTON));
+	}
+	// AER END
+
 
 	if (SendMessage(toolbar, TB_ADDBITMAP, (WPARAM)NUMCUSTOMBITMAPS, (LPARAM)&tbab) < 0)
 		ReportLastError();
@@ -1043,8 +1064,12 @@ void CreateToolbar(void)
 	{
 		RECT rect;
 		GetWindowRect(toolbar, &rect);
-		nToolbarHeight = rect.bottom - rect.top;
+		nToolbarHeight = (rect.bottom - rect.top) + 4; // AER added padding.
+
 	}
+
+
+
 }
 
 
@@ -7907,14 +7932,15 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		}
 	}
 
+	// AER NOTE: at this point enough of the app is set up that you can start doing general initialization. IE hwnd is set. 
+	
 	// AER START
-		{ // need an extra block to allow local definitions
+	{ 
 	typedef UINT (WINAPI *GETDPIFORWINDOW)(HWND);
 	GETDPIFORWINDOW gdpi = (GETDPIFORWINDOW)GetProcAddress(GetModuleHandle("user32.dll"), "GetDpiForWindow");
-	if (gdpi != NULL && gdpi(hwnd) >= 144) {
-		dbgBox("dpi %i", gdpi(hwnd));
+	if (gdpi != NULL && gdpi(hwnd) >= 140) { // anything close to 150% is counted as high dpi
 		bHighDPI = TRUE;
-		}}
+	}}
 		
 	// AER END
 

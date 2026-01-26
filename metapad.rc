@@ -720,7 +720,8 @@ IDI_PAD                 ICON    DISCARDABLE     "icon3.ico"
 // Bitmap
 //
 
-IDB_TOOLBAR             BITMAP  DISCARDABLE     "toolbar.bmp"
+IDB_TOOLBAR16             BITMAP  DISCARDABLE    "toolbar16.bmp"
+IDB_TOOLBAR24             BITMAP  DISCARDABLE    "toolbar24.bmp"
 IDB_DROP_ARROW          BITMAP  DISCARDABLE     "drop_arrow.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
