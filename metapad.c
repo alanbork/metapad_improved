@@ -166,7 +166,7 @@ extern atoi(const char*);
 #define STR_URL _T("http://liquidninja.com/metapad")
 #define STR_REGKEY _T("SOFTWARE\\metapad")
 #define STR_FAV_APPNAME _T("Favourites")
-#define STR_COPYRIGHT _T("©2026 Alan Robinson")
+#define STR_COPYRIGHT _T("Â©2026 Alan Robinson")
 
 ///// Macros /////
 
@@ -237,6 +237,9 @@ UINT nMRUTop;
 UINT nShadowSize;
 UINT uFindReplaceMsg;
 int nStatusHeight, nToolbarHeight;
+// AER START
+BOOL bHighDPI = FALSE;
+// AER END
 TCHAR szCustomFilter[2*MAXSTRING];
 BOOL bInsertMode, bHideMessage;
 int nReplaceMax;
@@ -387,7 +390,7 @@ void dbgBox(const char *format, ...) // alan's tool for showing some text for de
 }
 
 
-void dbg(const char *format, ...) // alan's tool for showing some text for debugging purposes. 
+void dbgHlp(const char *format, ...) // alan's tool for showing some text for debugging purposes. 
 {
 	char text[1024];    
 	MENUITEMINFO mii;
@@ -2759,8 +2762,6 @@ void SaveMRUInfo(LPCTSTR szFullPath)
 	TCHAR szTopVal[MAXFN];
 	DWORD dwBufferSize;
 	UINT i = 1;
-
-	dbg("options.nMaxMRU %i", options.nMaxMRU);
 
 	if (options.nMaxMRU == 0)
 		return;	
@@ -7868,6 +7869,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		return FALSE;
 	}
 
+
 	if (!bSkipLanguagePlugin) {
 		FindAndLoadLanguagePlugin();
 	}
@@ -7904,6 +7906,17 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			InsertMenuItem(hsub, 1, TRUE, &mio);
 		}
 	}
+
+	// AER START
+		{ // need an extra block to allow local definitions
+	typedef UINT (WINAPI *GETDPIFORWINDOW)(HWND);
+	GETDPIFORWINDOW gdpi = (GETDPIFORWINDOW)GetProcAddress(GetModuleHandle("user32.dll"), "GetDpiForWindow");
+	if (gdpi != NULL && gdpi(hwnd) >= 144) {
+		dbgBox("dpi %i", gdpi(hwnd));
+		bHighDPI = TRUE;
+		}}
+		
+	// AER END
 
 
 /*
