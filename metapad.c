@@ -166,7 +166,7 @@ extern atoi(const char*);
 #define STR_URL _T("http://liquidninja.com/metapad")
 #define STR_REGKEY _T("SOFTWARE\\metapad")
 #define STR_FAV_APPNAME _T("Favourites")
-#define STR_COPYRIGHT _T("©2026 Alan Robinson")
+#define STR_COPYRIGHT _T("(c)2026 Alan Robinson")
 
 ///// Macros /////
 
